@@ -11,6 +11,18 @@ pragma solidity >=0.4.21 <0.9.0;
  */
 interface ArbSys {
      /**
+     * @notice Get timestamphd nano second
+     * @return timestamphd as int
+     */
+
+    function getTimestampNanoSeonds() external view returns (uint256);
+     /**
+     * @notice Get timestamp micro second
+     * @return timestamphd as int
+     */
+    function getTimestampMiroSeonds() external view returns (uint256);
+
+     /**
      * @notice Get timestamphd
      * @return timestamphd as int
      */

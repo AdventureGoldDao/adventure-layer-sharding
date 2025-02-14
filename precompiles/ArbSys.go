@@ -29,6 +29,20 @@ type ArbSys struct {
 	L2ToL1TransactionGasCost func(addr, addr, huge, huge, huge, huge, huge, huge, huge, []byte) (uint64, error)
 }
 
+// GetTimestampNanoSeonds get timestamphd
+func (con *ArbSys) GetTimestampNanoSeonds(c ctx, evm mech) (huge, error) {
+	// get nano
+	now := new(big.Int).SetInt64(time.Now().UnixNano())
+	return now, nil
+}
+
+// GetTimestampMiroSeonds get timestamphd
+func (con *ArbSys) GetTimestampMiroSeonds(c ctx, evm mech) (huge, error) {
+	// get nano，convert to micro second
+	now := new(big.Int).SetInt64(time.Now().UnixMicro())
+	return now, nil
+}
+
 // GetTimestampHD get timestamphd
 func (con *ArbSys) GetTimestampHD(c ctx, evm mech) (huge, error) {
 	// get nano，convert to milisecond
