@@ -3,29 +3,30 @@ pragma solidity ^0.8.0;
 
 contract PrecompileCaller {
     function GetTimestampHD() public view returns (uint256) {
-        address precompileAddress = address(0x64); // 预编译合约的地址
-        bytes4 targetFuncSelector = bytes4(keccak256("getTimestampHD()")); // 函数选择器
+        address precompileAddress = address(0x64); // Address of the precompiled contract
+        bytes4 targetFuncSelector = bytes4(keccak256("getTimestampHD()")); // Function selector
 
-        // 准备输入数据：只有函数选择器，因为没有输入参数
+        // Prepare input data: only the function selector since there are no input parameters
         bytes memory input = abi.encodePacked(targetFuncSelector);
-        bytes memory output = new bytes(32); // 返回值是 uint256，占用 32 字节
+        bytes memory output = new bytes(32); // The return value is uint256, occupying 32 bytes
         bool success;
 
         assembly {
-            // 调用预编译合约
+            // Call the precompiled contract
             success := staticcall(
-                gas(),                // 使用剩余的 gas
-                precompileAddress,    // 预编译合约地址
-                add(input, 0x20),     // 输入数据的位置
-                mload(input),         // 输入数据的长度
-                add(output, 0x20),    // 输出数据的位置
-                32                    // 输出数据的长度 (uint256 为 32 字节)
+                gas(),                // Use remaining gas
+                precompileAddress,    // Precompiled contract address
+                add(input, 0x20),     // Location of input data
+                mload(input),         // Length of input data
+                add(output, 0x20),    // Location of output data
+                32                    // Length of output data (uint256 is 32 bytes)
             )
         }
 
         require(success, "Precompile call failed");
 
-        // 解码返回值，返回 uint256 类型
+        // Decode the return value and return uint256 type
         return abi.decode(output, (uint256));
     }
 }
+
