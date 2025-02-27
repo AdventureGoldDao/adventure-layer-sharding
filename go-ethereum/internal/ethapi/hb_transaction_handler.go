@@ -18,17 +18,20 @@ func (hb *HeartBeatAPI) sendHeartBeatTransaction(ctx context.Context, task *Cont
 
 	gasLimit, err := hb.estimateGas(ctx, &fromAddr, &task.ContractAddress, data)
 	if err != nil {
-		return fmt.Errorf("gas estimation failed: %w", err)
+		log.Error("Failed to estimate gas", "err", err)
+		return nil
 	}
 
 	gasPrice, err := hb.gasPrice(ctx)
 	if err != nil {
-		return fmt.Errorf("gas price fetch failed: %w", err)
+		log.Error("Failed to fetch gas price", "err", err)
+		return nil
 	}
 
 	nonce, err := hb.b.GetPoolNonce(ctx, fromAddr)
 	if err != nil {
-		return fmt.Errorf("nonce fetch failed: %w", err)
+		log.Error("Failed to fetch nonce", "err", err)
+		return nil
 	}
 
 	tx := types.NewTx(&types.LegacyTx{
@@ -42,13 +45,15 @@ func (hb *HeartBeatAPI) sendHeartBeatTransaction(ctx context.Context, task *Cont
 
 	signedTx, err := types.SignTx(tx, types.HomesteadSigner{}, key)
 	if err != nil {
-		return fmt.Errorf("tx signing failed: %w", err)
+		log.Error("Failed to sign tx", "err", err)
+		return nil
 	}
 	if err := checkTxFee(tx.GasPrice(), tx.Gas(), hb.b.RPCTxFeeCap()); err != nil {
 		return fmt.Errorf("tx fee estimation failed: %w", err)
 	}
 	if err := hb.b.SendTx(ctx, signedTx); err != nil {
-		return fmt.Errorf("tx sending failed: %w", err)
+		log.Error("Failed to send tx", "err", err)
+		return nil
 	}
 	//go func() {
 	//	var receipt *types.Receipt
