@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/offchainlabs/nitro/execution/gethexec/heartbeat"
 	"reflect"
 	"sort"
 	"sync/atomic"
@@ -286,6 +287,11 @@ func CreateExecutionNode(
 	apis = append(apis, rpc.API{
 		Namespace: "debug",
 		Service:   eth.NewDebugAPI(eth.NewArbEthereum(l2BlockChain, chainDB)),
+		Public:    false,
+	})
+	apis = append(apis, rpc.API{
+		Namespace: "adv",
+		Service:   heartbeat.NewHeartBeatAPI(backend),
 		Public:    false,
 	})
 
