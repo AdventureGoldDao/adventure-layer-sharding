@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 )
@@ -17,8 +18,20 @@ func NewStateManager() *StateManager {
 		log.Error("Failed to load HEAT_BEAT_PRIVATE_KEY:", err)
 		return nil
 	}
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Error("unable to read users home directory: %w", err)
+		return nil
+	}
+
+	dir := path.Join(homeDir, defaultStateDirname)
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		log.Error("unable to create global configuration directory: %w", err)
+		return nil
+	}
 	s := &StateManager{
-		StateDir:   defaultStateDirname,
+		StateDir:   dir,
 		PrivateKey: ecdsa,
 	}
 	err = s.LoadAll()
@@ -54,17 +67,8 @@ func (sm *StateManager) LoadOne(address common.Address) *ContractTask {
 	return nil
 }
 func (sm *StateManager) LoadAll() error {
-	if _, err := os.Stat(sm.StateDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(sm.StateDir, 0755); err != nil {
-			log.Error("Failed to create state directory", "error", err)
-			return err
-		}
-	}
 	entries, err := os.ReadDir(sm.StateDir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
 		return err
 	}
 	for _, entry := range entries {

@@ -36,7 +36,7 @@ type StateManager struct {
 
 const (
 	defaultGasMultiplier = 2
-	defaultStateDirname  = "/config/heartbeat_lists"
+	defaultStateDirname  = ".arbitrum/local/nitro/heartbeat_lists"
 )
 
 var (
