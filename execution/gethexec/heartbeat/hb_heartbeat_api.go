@@ -19,15 +19,20 @@ func NewHeartBeatAPI(b *arbitrum.Backend) *HeartBeatAPI {
 			ctx, cancel := context.WithCancel(context.Background())
 			task.CancelFunc = cancel
 			go hb.startPolling(ctx, task)
+			stateManager.Count++
 			return true
 		})
 	}
 	return hb
 }
 
-func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool) string {
-	if contractAddress == "" || accountPublicKey == "" || interval < 0 {
+func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool, signature string) string {
+	if contractAddress == "" || accountPublicKey == "" || interval >= 100 {
 		return fmt.Sprintf("params err!")
+	}
+	expectedSignature := generateSignature(contractAddress, accountPublicKey, interval)
+	if expectedSignature == "" || expectedSignature != signature {
+		return fmt.Sprintf("invalid signature")
 	}
 
 	accountAddr := common.HexToAddress(accountPublicKey)
@@ -52,6 +57,9 @@ func (hb *HeartBeatAPI) GetActiveHeartBeats() []map[string]string {
 }
 
 func (hb *HeartBeatAPI) startTask(accountPublicKey, contractAddress common.Address, interval int) string {
+	stateManagerMutex.Lock()
+	defer stateManagerMutex.Unlock()
+
 	if stateManager.LimitStatus() {
 		return fmt.Sprintf("heartbeat task limit ...")
 	}

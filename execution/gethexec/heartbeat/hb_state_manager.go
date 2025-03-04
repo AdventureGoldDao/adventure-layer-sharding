@@ -43,21 +43,16 @@ func NewStateManager() *StateManager {
 
 func (sm *StateManager) LimitStatus() bool {
 	hbLimitNum := os.Getenv("HEAT_BEAT_LIMIT_NUM")
-	count := 0
-	stateManager.ContractMap.Range(func(_, _ interface{}) bool {
-		count++
-		return true
-	})
 	hbLimitNumInt, err := strconv.Atoi(hbLimitNum)
-	if err != nil {
-		log.Error("Failed to convert HEAT_BEAT_LIMIT_NUM to int:", err)
-		return true
+	if hbLimitNum == "" || err != nil {
+		hbLimitNumInt = 8
 	}
-	return count >= hbLimitNumInt
+	return sm.Count >= hbLimitNumInt
 }
 func (sm *StateManager) Save(state *ContractTask) {
 	sm.ContractMap.Store(state.AccountPublicKey.Hex(), state)
 	sm.saveFile(state)
+	sm.Count++
 }
 
 func (sm *StateManager) LoadOne(address common.Address) *ContractTask {
@@ -98,6 +93,7 @@ func (sm *StateManager) LoadAll() error {
 
 func (sm *StateManager) Delete(address common.Address) {
 	sm.ContractMap.Delete(address.Hex())
+	sm.Count--
 	file := filepath.Join(sm.StateDir, address.Hex())
 	log.Info("heartbeat deleteFile", "file", file)
 	err := os.Remove(file)
