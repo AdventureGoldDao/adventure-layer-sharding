@@ -29,6 +29,7 @@ type StateData struct {
 }
 
 type StateManager struct {
+	Count       int
 	StateDir    string
 	PrivateKey  *ecdsa.PrivateKey
 	ContractMap sync.Map
@@ -40,5 +41,6 @@ const (
 )
 
 var (
-	stateManager *StateManager
+	stateManager      *StateManager
+	stateManagerMutex sync.Mutex
 )
