@@ -1,7 +1,7 @@
 package heartbeat
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/log"
@@ -14,7 +14,7 @@ func generateSignature(contractAddress, accountPublicKey string, interval int) s
 		log.Error("HEART_BEAT_SIGN_KEY is not set")
 		return ""
 	}
-	h := md5.New()
+	h := sha256.New()
 	h.Write([]byte(fmt.Sprintf("%s%s%d%s", contractAddress, accountPublicKey, interval, key)))
 	return hex.EncodeToString(h.Sum(nil))
 }
