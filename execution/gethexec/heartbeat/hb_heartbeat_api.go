@@ -27,7 +27,7 @@ func NewHeartBeatAPI(b *arbitrum.Backend) *HeartBeatAPI {
 }
 
 func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool, signature string) string {
-	if contractAddress == "" || accountPublicKey == "" || interval >= 100 {
+	if contractAddress == "" || accountPublicKey == "" || interval <= 100 {
 		return fmt.Sprintf("params err!")
 	}
 	expectedSignature := generateSignature(contractAddress, accountPublicKey, interval)
