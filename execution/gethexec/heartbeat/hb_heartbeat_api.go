@@ -30,11 +30,14 @@ func NewHeartBeatAPI(b *arbitrum.Backend) *HeartBeatAPI {
 	return hb
 }
 
-func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool, signature string) string {
+func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool, unx int64, signature string) string {
 	if contractAddress == "" || accountPublicKey == "" || interval <= 100 {
 		return "params err!"
 	}
-	expectedSignature := generateSignature(contractAddress, accountPublicKey, interval)
+	expectedSignature, err := generateSignature(contractAddress, accountPublicKey, interval, start, unx)
+	if err != nil {
+		return err.Error()
+	}
 	if expectedSignature == "" || expectedSignature != signature {
 		return "invalid signature"
 	}
