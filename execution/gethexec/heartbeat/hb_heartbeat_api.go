@@ -15,7 +15,11 @@ func NewHeartBeatAPI(b *arbitrum.Backend) *HeartBeatAPI {
 	stateManager = NewStateManager()
 	if stateManager != nil {
 		stateManager.ContractMap.Range(func(key, value interface{}) bool {
-			task := value.(*ContractTask)
+			task, ok := value.(*ContractTask)
+			if !ok {
+				log.Error("Failed to assert value to ContractTask")
+				return false
+			}
 			ctx, cancel := context.WithCancel(context.Background())
 			task.CancelFunc = cancel
 			go hb.startPolling(ctx, task)
@@ -26,13 +30,16 @@ func NewHeartBeatAPI(b *arbitrum.Backend) *HeartBeatAPI {
 	return hb
 }
 
-func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool, signature string) string {
+func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey string, interval int, start bool, unx int64, signature string) string {
 	if contractAddress == "" || accountPublicKey == "" || interval <= 100 {
-		return fmt.Sprintf("params err!")
+		return "params err!"
 	}
-	expectedSignature := generateSignature(contractAddress, accountPublicKey, interval)
+	expectedSignature, err := generateSignature(contractAddress, accountPublicKey, interval, start, unx)
+	if err != nil {
+		return err.Error()
+	}
 	if expectedSignature == "" || expectedSignature != signature {
-		return fmt.Sprintf("invalid signature")
+		return "invalid signature"
 	}
 
 	accountAddr := common.HexToAddress(accountPublicKey)
@@ -46,7 +53,10 @@ func (hb *HeartBeatAPI) ManageContractTask(contractAddress, accountPublicKey str
 func (hb *HeartBeatAPI) GetActiveHeartBeats() []map[string]string {
 	var activeHeartBeats []map[string]string
 	stateManager.ContractMap.Range(func(key, value interface{}) bool {
-		task := value.(*ContractTask)
+		task, ok := value.(*ContractTask)
+		if !ok {
+			return false
+		}
 		activeHeartBeats = append(activeHeartBeats, map[string]string{
 			"contractAddress":  task.ContractAddress.Hex(),
 			"accountPublicKey": task.AccountPublicKey.Hex(),
@@ -61,7 +71,7 @@ func (hb *HeartBeatAPI) startTask(accountPublicKey, contractAddress common.Addre
 	defer stateManagerMutex.Unlock()
 
 	if stateManager.LimitStatus() {
-		return fmt.Sprintf("heartbeat task limit ...")
+		return "heartbeat task limit ..."
 	}
 	if task := stateManager.LoadOne(accountPublicKey); task != nil {
 		task.CancelFunc()

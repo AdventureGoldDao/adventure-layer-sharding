@@ -33,7 +33,7 @@ func (hb *HeartBeatAPI) estimateGas(ctx context.Context, fromAddr *common.Addres
 	blockNrOrHash := rpc.BlockNumberOrHashWithNumber(rpc.PendingBlockNumber)
 	res, err := arbitrum.EstimateGas(ctx, hb.b.APIBackend(), args, blockNrOrHash, nil, hb.b.APIBackend().RPCGasCap())
 	if err != nil {
-		return 0, fmt.Errorf("failed to estimate gas: %v", err)
+		return 0, fmt.Errorf("failed to estimate gas: %w", err)
 	}
 	return uint64(res), nil
 }

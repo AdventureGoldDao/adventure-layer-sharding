@@ -55,7 +55,7 @@ func (hb *HeartBeatAPI) sendHeartBeatTransaction(ctx context.Context, task *Cont
 		log.Error("Failed to send tx", "err", err)
 		return nil
 	}
-	//go func() {
+	// go func() {
 	//	var receipt *types.Receipt
 	//	for {
 	//		time.Sleep(2 * time.Second)
@@ -77,7 +77,7 @@ func (hb *HeartBeatAPI) sendHeartBeatTransaction(ctx context.Context, task *Cont
 	//		"gas", signedTx.Gas(),
 	//		"actualGasFee", actualGasFee.String(),
 	//	)
-	//}()
+	// }()
 	log.Info("sendHeartBeatTransaction",
 		"hash", signedTx.Hash().Hex(),
 		"ContractAddress", task.ContractAddress.Hex(),
