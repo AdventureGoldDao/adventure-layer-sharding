@@ -135,10 +135,12 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 
 	dbDelayedCount, err := d.inbox.GetDelayedCount()
 	if err != nil {
+		log.Warn("DelayedSequencer: sequenceWithoutLockout,GetDelayedCount err")
 		return err
 	}
 	startPos, err := d.getDelayedMessagesRead()
 	if err != nil {
+		log.Warn("DelayedSequencer: sequenceWithoutLockout,getDelayedMessagesRead err")
 		return err
 	}
 
@@ -149,6 +151,7 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 	for pos < dbDelayedCount {
 		msg, acc, parentChainBlockNumber, err := d.inbox.GetDelayedMessageAccumulatorAndParentChainBlockNumber(ctx, pos)
 		if err != nil {
+			log.Warn("DelayedSequencer: sequenceWithoutLockout,getDelayedMessagesRead err")
 			return err
 		}
 		if parentChainBlockNumber > finalized {
@@ -170,9 +173,11 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 		lastDelayedAcc = acc
 		err = msg.FillInBatchGasCost(func(batchNum uint64) ([]byte, error) {
 			data, _, err := d.reader.GetSequencerMessageBytes(ctx, batchNum)
+			log.Warn("DelayedSequencer: sequenceWithoutLockout,GetSequencerMessageBytes err")
 			return data, err
 		})
 		if err != nil {
+			log.Warn("DelayedSequencer: sequenceWithoutLockout,other err")
 			return err
 		}
 		messages = append(messages, msg)
@@ -183,6 +188,7 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 	if len(messages) > 0 {
 		delayedBridgeAcc, err := d.bridge.GetAccumulator(ctx, pos-1, new(big.Int).SetUint64(finalized), finalizedHash)
 		if err != nil {
+			log.Warn("DelayedSequencer: sequenceWithoutLockout,bridge.GetAccumulator err")
 			return err
 		}
 		if delayedBridgeAcc != lastDelayedAcc {
@@ -193,6 +199,7 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 			// #nosec G115
 			err = d.exec.SequenceDelayedMessage(msg, startPos+uint64(i))
 			if err != nil {
+				log.Warn("DelayedSequencer: sequenceWithoutLockout,SequenceDelayedMessage err")
 				return err
 			}
 		}
