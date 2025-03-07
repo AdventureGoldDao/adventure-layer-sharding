@@ -119,7 +119,7 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 		log.Warn("DelayedSequencer: sequenceWithoutLockout,HeaderIndicatesFinalitySupport ", 
 							"finalized", finalized, 
 							"finalizedHash", finalizedHash, 
-							"config.UseMergeFinality", config.UseMergeFinality)
+							"config.RequireFullFinality", config.RequireFullFinality)
 	} else {
 		currentNum := lastBlockHeader.Number.Int64()
 		if currentNum < config.FinalizeDistance {
