@@ -116,6 +116,7 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 		}
 		finalized = header.Number.Uint64()
 		finalizedHash = header.Hash()
+		log.Warn("DelayedSequencer: sequenceWithoutLockout,HeaderIndicatesFinalitySupport ", finalized, finalizedHash, config.RequireFullFinality)
 	} else {
 		currentNum := lastBlockHeader.Number.Int64()
 		if currentNum < config.FinalizeDistance {
@@ -123,6 +124,7 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 		}
 		// #nosec G115
 		finalized = uint64(currentNum - config.FinalizeDistance)
+		log.Warn("DelayedSequencer: sequenceWithoutLockout,esle branch", finalized, finalizedHash, config.RequireFullFinality)
 	}
 
 	if d.waitingForFinalizedBlock > finalized {
