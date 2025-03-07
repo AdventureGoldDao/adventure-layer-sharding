@@ -188,7 +188,12 @@ func (d *DelayedSequencer) sequenceWithoutLockout(ctx context.Context, lastBlock
 	if len(messages) > 0 {
 		delayedBridgeAcc, err := d.bridge.GetAccumulator(ctx, pos-1, new(big.Int).SetUint64(finalized), finalizedHash)
 		if err != nil {
-			log.Warn("DelayedSequencer: sequenceWithoutLockout,bridge.GetAccumulator err")
+			log.Warn("DelayedSequencer: sequenceWithoutLockout,bridge.GetAccumulator err", 
+				"pos", pos-1,
+				"finalized", finalized,
+				"finalizedHash", finalizedHash,
+				"err", err,
+			)
 			return err
 		}
 		if delayedBridgeAcc != lastDelayedAcc {

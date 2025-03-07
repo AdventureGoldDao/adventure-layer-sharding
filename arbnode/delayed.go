@@ -104,6 +104,11 @@ func (b *DelayedBridge) GetAccumulator(ctx context.Context, sequenceNumber uint6
 	calldata := append([]byte{}, delayedInboxAccsCallABI.ID...)
 	inputs, err := delayedInboxAccsCallABI.Inputs.Pack(arbmath.UintToBig(sequenceNumber))
 	if err != nil {
+		log.Warn("DelayedBridge: GetAccumulator,Inputs.Pack err", 
+				"sequenceNumber", sequenceNumber,
+				"blockNumber", blockNumber,
+				"blockHash", blockHash,
+			)
 		return common.Hash{}, err
 	}
 	calldata = append(calldata, inputs...)
@@ -112,16 +117,31 @@ func (b *DelayedBridge) GetAccumulator(ctx context.Context, sequenceNumber uint6
 		Data: calldata,
 	}
 	var result hexutil.Bytes
+	var isUseHash boolean
 	if blockHash != (common.Hash{}) {
+		isUseHash = true
 		result, err = b.client.CallContractAtHash(ctx, msg, blockHash)
 	} else {
+		isUseHash = false
 		result, err = b.client.CallContract(ctx, msg, blockNumber)
 	}
 	if err != nil {
+		log.Warn("DelayedBridge: GetAccumulator,CallContract err", 
+				"sequenceNumber", sequenceNumber,
+				"blockNumber", blockNumber,
+				"blockHash", blockHash,
+				"isUseHash",isUseHash,
+			)
 		return common.Hash{}, err
 	}
 	values, err := delayedInboxAccsCallABI.Outputs.Unpack(result)
 	if err != nil {
+		log.Warn("DelayedBridge: GetAccumulator,Outputs.Unpack err", 
+				"sequenceNumber", sequenceNumber,
+				"blockNumber", blockNumber,
+				"blockHash", blockHash,
+				"isUseHash",isUseHash,
+			)
 		return common.Hash{}, err
 	}
 	if len(values) != 1 {
