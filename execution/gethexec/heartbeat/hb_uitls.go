@@ -22,15 +22,19 @@ func generateSignature(contractAddress, accountPublicKey string, interval int, s
 	}
 	h := sha256.New()
 	var builder strings.Builder
-	builder.WriteString(contractAddress)
-	builder.WriteString(accountPublicKey)
-	builder.WriteString(strconv.Itoa(interval))
-	builder.WriteString(strconv.FormatInt(unx, 10))
-	builder.WriteString(key)
+	addField := func(value string) {
+		builder.WriteString(fmt.Sprintf("%d", len(value)))
+		builder.WriteString(value)
+	}
+	addField(contractAddress)
+	addField(accountPublicKey)
+	addField(strconv.Itoa(interval))
+	addField(strconv.FormatInt(unx, 10))
+	addField(key)
 	if start {
-		builder.WriteString("start")
+		addField("start")
 	} else {
-		builder.WriteString("stop")
+		addField("stop")
 	}
 	h.Write([]byte(builder.String()))
 	return hex.EncodeToString(h.Sum(nil)), nil
