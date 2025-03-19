@@ -1,0 +1,46 @@
+package heartbeat
+
+import (
+	"context"
+	"crypto/ecdsa"
+	"github.com/ethereum/go-ethereum/arbitrum"
+	"sync"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+)
+
+type HeartBeatAPI struct {
+	b *arbitrum.Backend
+}
+
+type ContractTask struct {
+	SendTxMutex      sync.Mutex
+	CancelFunc       context.CancelFunc
+	Interval         time.Duration
+	AccountPublicKey common.Address
+	ContractAddress  common.Address
+}
+
+type StateData struct {
+	Interval         time.Duration `json:"interval"`
+	AccountPublicKey string        `json:"AccountPublicKey"`
+	ContractAddress  string        `json:"contractAddress"`
+}
+
+type StateManager struct {
+	Count       int
+	StateDir    string
+	PrivateKey  *ecdsa.PrivateKey
+	ContractMap sync.Map
+}
+
+const (
+	defaultGasMultiplier = 2
+	defaultStateDirname  = ".arbitrum/local/nitro/heartbeat_lists"
+)
+
+var (
+	stateManager      *StateManager
+	stateManagerMutex sync.Mutex
+)
